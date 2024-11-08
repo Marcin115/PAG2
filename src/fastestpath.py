@@ -61,8 +61,8 @@ class Graph:
     def astar_fastest(self, a, b):
         queue = []  
         heapq.heappush(queue, (0, a))  # Inicjalizacja z wartością początkową `a`
-        a.g = 0  # Koszt dotarcia do `a` to 0
-        a.f = a.heuristic_time(b)  # Heurystyka czasu z `a` do celu `b`
+        a.g = 0  # domyslnie 0
+        a.f = a.heuristic_time(b)  # Heurystyka czasu z a do celu b
         visited = set()  # Zbiór odwiedzonych węzłów
         prev = {}  # Słownik poprzedników do odtworzenia ścieżki
         prev[a] = None
@@ -75,7 +75,7 @@ class Graph:
                 used_edges = self.get_used_edges(path)
                 return path, used_edges
 
-            visited.add(u)  # Dodajemy węzeł do odwiedzonych
+            visited.add(u) 
             for edge in u.edges_out:
                 neighbor = self.nodes.get(edge.id_to)
                 if neighbor in visited:
@@ -108,18 +108,17 @@ class Node:
     def __init__(self, x: int, y: int):
         self.x = x
         self.y = y
-        self.id = f"{self.x},{self.y}"  # Identyfikator oparty na współrzędnych
+        self.id = f"{self.x},{self.y}"  # Identyfikator współrzędnych
         self.edges_out = []  # Lista krawędzi wychodzących z wierzchołka
-        self.h = None  # Wartość heurystyki dla A*
+        self.h = None  # Wartość heurystyki 
         self.g = float('inf')  # Koszt dotarcia do węzła
-        self.f = float('inf')  # Wartość heurystyki łącznej A*
+        self.f = float('inf')  # Wartość heurystyki łącznej A* g+h
 
     def heuristic_time(self, goal):
         max_speed = 90 / 3.6 
         self.h = np.sqrt((goal.x - self.x) ** 2 + (goal.y - self.y) ** 2) / max_speed
         return self.h
 
-    # Funkcja dodająca krawędź wychodzącą z wierzchołka
     def add_edge(self, edge: Edge):
         self.edges_out.append(edge)
 
@@ -144,7 +143,7 @@ def load_shp_into_graph(workspace_path: str, shp_path: str, graph: Graph):
             edge = Edge(id, start_coords, end_coords, id, length, time_cost)
             graph.add_edge(edge)
 
-# Funkcja zapisująca wynikową ścieżkę do pliku shapefile
+# Funkcja zapisująca wynikową ścieżkę do pliku shape
 def save_shp(workspace_path: str, shp_to_copy: str, shp_result: str, used_edges: list):
     arcpy.env.workspace = workspace_path
     arcpy.CreateFeatureclass_management(
@@ -161,7 +160,7 @@ def save_shp(workspace_path: str, shp_to_copy: str, shp_result: str, used_edges:
             if int(row[0]) in used_edges_id:
                 insert_cursor.insertRow(row)
 
-    #print(f"Resulting shapefile saved as {shp_result}")
+    #print(f"shape saved ok {shp_result}")
 
 if __name__ == "__main__":
     graph = Graph()
@@ -170,7 +169,6 @@ if __name__ == "__main__":
     shp_path = "jezdnie.shp"
     shp_result = "result2"
 
-    # Ładowanie danych z pliku do grafu
     load_shp_into_graph(workspace, shp_path, graph)
     a = list(graph.nodes.values())[0]  
     b = list(graph.nodes.values())[10]  
